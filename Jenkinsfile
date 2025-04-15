@@ -6,7 +6,24 @@ pipeline {
     stages {
         stage('build') {
             steps {
-                sh 'python3 --version'
+                script {
+                    docker.build("jklabs:${env.BUILD_NUMBER}")
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                script {
+                    docker.image("jklabs:${env.BUILD_NUMBER}").run("--name jklabs_${env.BUILD_NUMBER}")
+                }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                sh "docker container rm jklabs_${env.BUILD_NUMBER}"
+                echo "Completed Pipeline Execution!"
             }
         }
     }
